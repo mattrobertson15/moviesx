@@ -117,7 +117,7 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - Out of scope: Prometheus metrics, structured logging, Grafana, Kustomize, OpenAPI/Swagger, CLI flags
 - Failure condition: Schema invented rather than inferred from data files; any validation rule missing a negative test; coverage below 80%
 
-**Start time:** *(14:50)*
+**Start time:** *(16:50)*
 
 **RPI cycle**
 - Research: `.copilot-tracking/2026-06-02-api-research.md`
@@ -144,18 +144,18 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
 - [ ] Next session starter:
 
-**End time:**
-**Total focus minutes:**
+**End time:** 17:27
+**Total focus minutes:** 37
 **Tag shipped:** 0.2.0
 
 **One-paragraph summary**
-
+Implemented API changes and testing. API wired and gets movies, actors, genres, and has 404 for errors. Tested and good. Updated claude.md
 
 **Health signal**
-- Framing quality (1–5):
-- Drift (yes/no):
-- Fit check honest (yes/no):
-- Close complete (yes/no):
+- Framing quality (1–5): 5
+- Drift (yes/no): no 
+- Fit check honest (yes/no): yes
+- Close complete (yes/no): yes
 
 ---
 
