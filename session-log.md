@@ -135,14 +135,14 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - Parking lot:
 
 **Close ritual**
-- [ ] Tests green
-- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
-- [ ] Tag (`git tag 0.2.0 && git push origin 0.2.0`)
-- [ ] Repo memory updated (CLAUDE.md session map + any new decisions)
-- [ ] End time written in the moment
-- [ ] Git timestamp cross-check done now
-- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
-- [ ] Next session starter:
+- [ y ] Tests green
+- [ y ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ y ] Tag (`git tag 0.2.0 && git push origin 0.2.0`)
+- [ y ] Repo memory updated (CLAUDE.md session map + any new decisions)
+- [ y ] End time written in the moment
+- [ y ] Git timestamp cross-check done now
+- [ y  ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ y ] Next session starter: Impelment prometheus and grafana metrics.
 
 **End time:** 17:27
 **Total focus minutes:** 37
@@ -156,6 +156,55 @@ Implemented API changes and testing. API wired and gets movies, actors, genres, 
 - Drift (yes/no): no 
 - Fit check honest (yes/no): yes
 - Close complete (yes/no): yes
+
+---
+
+## Session 3 — 2026-06-02
+
+**Frame**
+- Goal: Prometheus metrics middleware + structured JSON logging + Grafana dashboard auto-provisioned + Kustomize base/overlays/dev, tagged `0.3.0`
+- Out of scope: OpenAPI/Swagger, /readyz, NetworkPolicy, CLI flags, actorId/rating filters (parking lot)
+- Failure condition: /metrics endpoint missing or returning wrong format; Grafana dashboard doesn't auto-provision on k3s; logs are not valid JSON on stdout
+
+**Start time:** *(17:35)*
+
+**RPI cycle**
+- Research: `.copilot-tracking/2026-06-02-observability-research.md`
+- Plan: `.copilot-tracking/2026-06-02-observability-plan.md`
+- Changes: `.copilot-tracking/2026-06-02-observability-changes.md`
+- Review: `.copilot-tracking/2026-06-02-observability-review.md`
+
+**Fit check**
+- Will this plan fit in 90–120 min? YEs
+- Smallest cut if no: defer Kustomize restructure (keep flat k8s/ for now, add base/overlays in Session 4); ship metrics + logging + Grafana ConfigMap only
+- Decision: Proceed
+
+**During**
+- Drift moments:
+- Parking lot:
+
+**Close ritual**
+- [ ] Tests green
+- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ ] Tag (`git tag 0.3.0 && git push origin 0.3.0`)
+- [ ] Repo memory updated (CLAUDE.md session map + metric names + logging decisions)
+- [ ] End time written in the moment
+- [ ] Git timestamp cross-check done now
+- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ ] Next session starter:
+
+**End time:**
+**Total focus minutes:**
+**Tag shipped:** 0.3.0
+
+**One-paragraph summary**
+
+
+**Health signal**
+- Framing quality (1–5):
+- Drift (yes/no):
+- Fit check honest (yes/no):
+- Close complete (yes/no):
 
 ---
 
