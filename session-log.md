@@ -96,12 +96,60 @@ What I built · what I decided · what matters for next time.
 - [ y ] Next session starter: Get all API endpoints working and unit/integration tests >80% coverage.
 
 **End time:** 16:43
-**Total focus minutes:** 90
-**Tag shipped:**
-0.10
+**Total focus minutes:** 97
+**Tag shipped:** 0.1.0
 
 **One-paragraph summary**
 Researched options for stack and proceeded with best choice. Shipped initial version without metrics integrated.  Created claude.md based on chosen stack.
+
+**Health signal**
+- Framing quality (1–5): 5
+- Drift (yes/no): no
+- Fit check honest (yes/no): yes
+- Close complete (yes/no): yes
+
+---
+
+## Session 2 — 2026-06-02
+
+**Frame**
+- Goal: Data layer loaded from src/data/ + all /api/* endpoints + input validation (400s) + unit & integration tests ≥80% coverage, tagged `0.2.0`
+- Out of scope: Prometheus metrics, structured logging, Grafana, Kustomize, OpenAPI/Swagger, CLI flags
+- Failure condition: Schema invented rather than inferred from data files; any validation rule missing a negative test; coverage below 80%
+
+**Start time:** *(write this the instant the frame is done — not later)*
+
+**RPI cycle**
+- Research: `.copilot-tracking/2026-06-02-api-research.md`
+- Plan: `.copilot-tracking/2026-06-02-api-plan.md`
+- Changes: `.copilot-tracking/2026-06-02-api-changes.md`
+- Review: `.copilot-tracking/2026-06-02-api-review.md`
+
+**Fit check**
+- Will this plan fit in 90–120 min?
+- Smallest cut if no: defer /readyz to Session 4; defer actorId filter on /api/movies if query semantics are complex
+- Decision:
+
+**During**
+- Drift moments:
+- Parking lot:
+
+**Close ritual**
+- [ ] Tests green
+- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ ] Tag (`git tag 0.2.0 && git push origin 0.2.0`)
+- [ ] Repo memory updated (CLAUDE.md session map + any new decisions)
+- [ ] End time written in the moment
+- [ ] Git timestamp cross-check done now
+- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ ] Next session starter:
+
+**End time:**
+**Total focus minutes:**
+**Tag shipped:** 0.2.0
+
+**One-paragraph summary**
+
 
 **Health signal**
 - Framing quality (1–5):
