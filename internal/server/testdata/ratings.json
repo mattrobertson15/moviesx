@@ -1,0 +1,29 @@
+[
+	{
+		"id": "tt0000001",
+		"key": "tt0000001",
+		"_id": "tt0000001",
+		"movieId": "tt0000001",
+		"type": "Rating",
+		"rating": 8.5,
+		"votes": 10000
+	},
+	{
+		"id": "tt0000002",
+		"key": "tt0000002",
+		"_id": "tt0000002",
+		"movieId": "tt0000002",
+		"type": "Rating",
+		"rating": 7.5,
+		"votes": 5000
+	},
+	{
+		"id": "tt0000003",
+		"key": "tt0000003",
+		"_id": "tt0000003",
+		"movieId": "tt0000003",
+		"type": "Rating",
+		"rating": 8.5,
+		"votes": 20000
+	}
+]

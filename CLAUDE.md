@@ -1,7 +1,7 @@
 # CLAUDE.md — moviesx
 
 Repo memory for the movies experiment. Updated at the close of each session.
-Last updated: Session 1 (2026-06-02, tag 0.1.0).
+Last updated: Session 2 (2026-06-02, tag 0.2.0).
 
 ## Stack
 
@@ -13,13 +13,21 @@ Last updated: Session 1 (2026-06-02, tag 0.1.0).
 ## Project Layout
 
 ```
-cmd/moviesx/main.go          entry point — loads config, starts HTTP server
-internal/config/config.go    env-var config layer (MOVIES_PORT, MOVIES_LOG_LEVEL, MOVIES_DATA_DIR)
-internal/server/server.go    HTTP handler registration
-k8s/deployment.yaml          Deployment (non-root, liveness/readiness on /healthz)
-k8s/service.yaml             ClusterIP, port 80 → targetPort 8080
-src/data/                    movies.json, actors.json, ratings.json (baked into image at /data)
-Dockerfile                   multi-stage: golang:1.22-bookworm → distroless/static:nonroot
+cmd/moviesx/main.go                  entry point — loads store, starts HTTP server
+internal/config/config.go            env-var config layer (MOVIES_PORT, MOVIES_LOG_LEVEL, MOVIES_DATA_DIR)
+internal/server/server.go            HTTP handler registration; server struct holds store + version
+internal/server/genres.go            GET /api/genres
+internal/server/movies.go            GET /api/movies, GET /api/movies/{id}
+internal/server/actors.go            GET /api/actors, GET /api/actors/{id}
+internal/server/integration_test.go  end-to-end tests via httptest against fixture dataset
+internal/store/types.go              data types: Movie, Actor, Role, Page[T], MovieListItem, MovieDetail
+internal/store/store.go              Load(dataDir) — parses data files, pre-joins ratings, pre-sorts
+internal/validate/validate.go        input validation helpers (no net/http dependency)
+k8s/deployment.yaml                  Deployment (non-root, liveness/readiness on /healthz)
+k8s/service.yaml                     ClusterIP, port 80 → targetPort 8080
+src/data/                            movies.json, actors.json, ratings.json (baked into image at /data)
+Dockerfile                           multi-stage: golang:1.22-bookworm → distroless/static:nonroot
+Makefile                             make test (runs tests + coverage gate), make build
 ```
 
 ## Config
@@ -34,9 +42,14 @@ CLI flags deferred to a later session. Env-var config only for now.
 
 ## Key Implementation Decisions
 
-- **Version string:** `var version = "0.1.0"` in `internal/server/server.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
+- **Version string:** `var version = "0.2.0"` in `cmd/moviesx/main.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
 - **`runAsUser: 65532`** in Deployment `securityContext` — distroless nonroot UID; required because Kubernetes `runAsNonRoot` validation needs a numeric UID, not just the named user `nonroot`.
 - **`go.mod` pins `go 1.22`** even though local toolchain is 1.26.3, to match the Docker builder image and keep builds reproducible.
+- **D1 — Response envelope:** All list endpoints return `{ "items": [...], "total": N, "page": N, "pageSize": N }`. Implemented as `Page[T any]` generic in `internal/store/types.go`.
+- **D2 — Roles scope:** `GET /api/movies` list items include cast-only roles (`actor`/`actress` categories) in a `cast` field. `GET /api/movies/{id}` includes all roles in a `roles` field.
+- **Store immutability:** `store.Store` has no exported mutable fields. `AllMovies()` and `AllActors()` return copies of the internal sorted slices.
+- **Pre-sorted at load:** movies sorted (rating desc, title asc), actors sorted (name asc) at `Load` time; handlers iterate and filter without re-sorting.
+- **actorId + rating filters on `/api/movies`:** Deferred to Parking Lot — not implemented in 0.2.0.
 
 ## Local Cluster
 
@@ -49,22 +62,32 @@ CLI flags deferred to a later session. Env-var config only for now.
 ## Testing
 
 ```
-go test ./...                  # all tests
-go test ./internal/config/...  # config unit tests
-go test ./internal/server/...  # server unit tests (httptest)
+make test                          # all tests + coverage gate (≥80%)
+go test ./...                      # all tests without coverage gate
+go test ./internal/config/...      # config unit tests
+go test ./internal/store/...       # store unit tests
+go test ./internal/validate/...    # validation unit tests
+go test ./internal/server/...      # server unit + integration tests
 ```
 
-## Build & Deploy Inner Loop (current, Session 1)
+Coverage as of 0.2.0: **92.4%** total (gate: 80%).
+
+## Build & Deploy Inner Loop (Session 2)
 
 ```bash
-go test ./...
-docker build -t moviesx:0.x.y .
-k3d image import moviesx:0.x.y -c movies
+make test
+docker build -t moviesx:0.2.0 .
+k3d image import moviesx:0.2.0 -c movies
 # update image tag in k8s/deployment.yaml
 docker exec k3d-movies-server-0 kubectl apply -f /path/to/k8s/
 kubectl port-forward svc/moviesx 8080:80
 curl localhost:8080/version
 curl localhost:8080/healthz
+curl localhost:8080/api/genres
+curl "localhost:8080/api/movies?genre=Action&pageSize=5"
+curl localhost:8080/api/movies/tt0120737
+curl "localhost:8080/api/actors?q=Wood"
+curl localhost:8080/api/actors/nm0000704
 ```
 
 ## Session Map
@@ -72,8 +95,8 @@ curl localhost:8080/healthz
 | Tag | Goal | Status |
 |---|---|---|
 | `0.1.0` | Stack + /version + /healthz on k3s | ✅ done |
-| `0.2.0` | Data layer + /api/* endpoints + validation + tests ≥80% | next |
-| `0.3.0` | Prometheus metrics + structured logging + Grafana + Kustomize | — |
+| `0.2.0` | Data layer + /api/* endpoints + validation + tests ≥80% | ✅ done |
+| `0.3.0` | Prometheus metrics + structured logging + Grafana + Kustomize | next |
 | `0.4.0` | OpenAPI/Swagger + /readyz + security hardening + NetworkPolicy | — |
 | `0.5.0` | Custom HTTP replay tool (§10.3 baseline + §10.4 benchmark) | — |
 | `1.0.0` | §14 gap close + inner-loop README + acceptance pass | — |

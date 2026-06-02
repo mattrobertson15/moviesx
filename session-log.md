@@ -126,9 +126,9 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - Review: `.copilot-tracking/2026-06-02-api-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min? Yes
-- Smallest cut if no: defer /readyz to Session 4; defer actorId filter on /api/movies if query semantics are complex
-- Decision: Continue
+- Will this plan fit in 90–120 min? No
+- Smallest cut if no: defer actorId filter on /api/movies if query semantics are complex , cut rating filter
+- Decision: Cut actor/ID and rating filter
 
 **During**
 - Drift moments:

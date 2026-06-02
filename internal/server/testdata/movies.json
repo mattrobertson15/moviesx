@@ -1,0 +1,49 @@
+[
+	{
+		"id": "tt0000001",
+		"key": "tt0000001",
+		"_id": "tt0000001",
+		"movieId": "tt0000001",
+		"type": "movie",
+		"title": "Alpha Movie",
+		"year": 2001,
+		"runtime": 120,
+		"genres": ["Drama", "Action"],
+		"roles": [
+			{"order": 1, "actorId": "nm0000001", "name": "Alice Smith", "category": "actor", "characters": ["Hero"]},
+			{"order": 2, "actorId": "nm0000003", "name": "Carol Davis", "category": "self"},
+			{"order": 3, "actorId": "nm0000099", "name": "Director One", "category": "director", "job": "director"}
+		]
+	},
+	{
+		"id": "tt0000002",
+		"key": "tt0000002",
+		"_id": "tt0000002",
+		"movieId": "tt0000002",
+		"type": "movie",
+		"title": "Beta Movie",
+		"year": 2001,
+		"runtime": 95,
+		"genres": ["Action", "Comedy"],
+		"roles": [
+			{"order": 1, "actorId": "nm0000002", "name": "Bob Jones", "category": "actor", "characters": ["Villain"]},
+			{"order": 2, "actorId": "nm0000099", "name": "Director One", "category": "director"}
+		]
+	},
+	{
+		"id": "tt0000003",
+		"key": "tt0000003",
+		"_id": "tt0000003",
+		"movieId": "tt0000003",
+		"type": "movie",
+		"title": "Gamma Movie",
+		"year": 2003,
+		"runtime": 110,
+		"genres": ["Drama", "Thriller"],
+		"roles": [
+			{"order": 1, "actorId": "nm0000001", "name": "Alice Smith", "category": "actress", "characters": ["Lead"]},
+			{"order": 2, "actorId": "nm0000003", "name": "Carol Davis", "category": "actress", "characters": ["Support"]},
+			{"order": 3, "actorId": "nm0000099", "name": "Director One", "category": "director", "job": "director"}
+		]
+	}
+]

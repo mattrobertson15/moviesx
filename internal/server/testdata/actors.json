@@ -1,0 +1,46 @@
+[
+	{
+		"id": "nm0000001",
+		"key": "nm0000001",
+		"_id": "nm0000001",
+		"actorId": "nm0000001",
+		"type": "actor",
+		"name": "Alice Smith",
+		"birthYear": 1970,
+		"deathYear": 0,
+		"profession": ["actress"],
+		"movies": [
+			{"movieId": "tt0000001", "title": "Alpha Movie"},
+			{"movieId": "tt0000003", "title": "Gamma Movie"}
+		]
+	},
+	{
+		"id": "nm0000002",
+		"key": "nm0000002",
+		"_id": "nm0000002",
+		"actorId": "nm0000002",
+		"type": "actor",
+		"name": "Bob Jones",
+		"birthYear": 0,
+		"deathYear": 0,
+		"profession": ["actor"],
+		"movies": [
+			{"movieId": "tt0000002", "title": "Beta Movie"}
+		]
+	},
+	{
+		"id": "nm0000003",
+		"key": "nm0000003",
+		"_id": "nm0000003",
+		"actorId": "nm0000003",
+		"type": "actor",
+		"name": "Carol Davis",
+		"birthYear": 1960,
+		"deathYear": 2020,
+		"profession": ["actress"],
+		"movies": [
+			{"movieId": "tt0000001", "title": "Alpha Movie"},
+			{"movieId": "tt0000003", "title": "Gamma Movie"}
+		]
+	}
+]
