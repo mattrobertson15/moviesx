@@ -61,32 +61,32 @@ What I built · what I decided · what matters for next time.
 
 ---
 
-## Session 1 — [date]
+## Session 1 — 2026-06-02
 
 **Frame**
-- Goal:
-- Out of scope:
-- Failure condition:
+- Goal: Choose stack + ship /version and /healthz end-to-end on local k3s, tagged 0.1.0
+- Out of scope: Any data endpoints, metrics, Grafana, test suite, OpenAPI
+- Failure condition: Stack not chosen with written justification, or no running pod on k3s by end of session
 
-**Start time:**
+**Start time:** 15:06
 
 **RPI cycle**
-- Research:
-- Plan:
-- Changes:
-- Review:
+- Research: `.copilot-tracking/2026-06-02-stack-research.md`
+- Plan: `.copilot-tracking/2026-06-02-stack-plan.md`
+- Changes: `.copilot-tracking/2026-06-02-stack-changes.md`
+- Review: `.copilot-tracking/2026-06-02-stack-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min?
-- Smallest cut if no:
-- Decision:
+- Will this plan fit in 90–120 min? Yes
+- Smallest cut if no: N/A
+- Decision: Proceed
 
 **During**
 - Drift moments:
 - Parking lot:
 
 **Close ritual**
-- [ ] Tests green
+- [ y] Tests green
 - [ ] FF-merge
 - [ ] Tag
 - [ ] Repo memory updated

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moviesx
+  labels:
+    app: moviesx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moviesx
+  template:
+    metadata:
+      labels:
+        app: moviesx
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+      containers:
+        - name: moviesx
+          image: moviesx:dev
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MOVIES_PORT
+              value: "8080"
+            - name: MOVIES_LOG_LEVEL
+              value: info
+            - name: MOVIES_DATA_DIR
+              value: /data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2

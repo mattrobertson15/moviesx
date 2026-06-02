@@ -1,0 +1,4 @@
+.git
+.copilot-tracking
+*.md
+**/*_test.go

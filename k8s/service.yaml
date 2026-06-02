@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: moviesx
+  labels:
+    app: moviesx
+spec:
+  type: ClusterIP
+  selector:
+    app: moviesx
+  ports:
+    - port: 80
+      targetPort: 8080
