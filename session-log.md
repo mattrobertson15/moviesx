@@ -117,7 +117,7 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - Out of scope: Prometheus metrics, structured logging, Grafana, Kustomize, OpenAPI/Swagger, CLI flags
 - Failure condition: Schema invented rather than inferred from data files; any validation rule missing a negative test; coverage below 80%
 
-**Start time:** *(write this the instant the frame is done — not later)*
+**Start time:** *(14:50)*
 
 **RPI cycle**
 - Research: `.copilot-tracking/2026-06-02-api-research.md`
@@ -126,9 +126,9 @@ Researched options for stack and proceeded with best choice. Shipped initial ver
 - Review: `.copilot-tracking/2026-06-02-api-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min?
+- Will this plan fit in 90–120 min? Yes
 - Smallest cut if no: defer /readyz to Session 4; defer actorId filter on /api/movies if query semantics are complex
-- Decision:
+- Decision: Continue
 
 **During**
 - Drift moments:
