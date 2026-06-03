@@ -208,4 +208,53 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 
 ---
 
+## Session 4 — 2026-06-03
+
+**Frame**
+- Goal: OpenAPI 3 spec + Swagger UI + /readyz + NetworkPolicy + security context hardening (readOnlyRootFilesystem, drop ALL caps), tagged `0.4.0`
+- Out of scope: CLI flags, actorId/rating filters (parking lot), replay tool, inner-loop README
+- Failure condition: /swagger doesn't load Swagger UI; /readyz returns 200 before data is loaded; security context missing readOnlyRootFilesystem or drop ALL caps
+
+**Start time:** *(17:21)*
+
+**RPI cycle**
+- Research: `.copilot-tracking/2026-06-03-openapi-research.md`
+- Plan: `.copilot-tracking/2026-06-03-openapi-plan.md`
+- Changes: `.copilot-tracking/2026-06-03-openapi-changes.md`
+- Review: `.copilot-tracking/2026-06-03-openapi-review.md`
+
+**Fit check**
+- Will this plan fit in 90–120 min?
+- Smallest cut if no: defer NetworkPolicy to Session 5 gap-close; ship OpenAPI + /readyz + securityContext only
+- Decision:
+
+**During**
+- Drift moments:
+- Parking lot:
+
+**Close ritual**
+- [ ] Tests green
+- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ ] Tag (`git tag 0.4.0 && git push origin 0.4.0`)
+- [ ] Repo memory updated (CLAUDE.md session map + OpenAPI approach decision)
+- [ ] End time written in the moment
+- [ ] Git timestamp cross-check done now
+- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ ] Next session starter:
+
+**End time:**
+**Total focus minutes:**
+**Tag shipped:** 0.4.0
+
+**One-paragraph summary**
+
+
+**Health signal**
+- Framing quality (1–5):
+- Drift (yes/no):
+- Fit check honest (yes/no):
+- Close complete (yes/no):
+
+---
+
 <!-- Copy the Session Template block above for each new session. -->
