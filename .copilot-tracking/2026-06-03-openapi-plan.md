@@ -15,7 +15,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T1 — Add readiness flag to server struct
 
-- [ ] **Files:** `internal/server/server.go`
+- [x] **Files:** `internal/server/server.go`
 - Add `ready atomic.Bool` field to the `server` struct (import `sync/atomic`).
 - Add `func (s *server) SetReady()` method: calls `s.ready.Store(true)`.
 - Change `New()` return signature from `http.Handler` to `(*server, http.Handler)` so `main.go` can call `SetReady()` — OR add a returned `func()` closure (`readyFn`). Either form is acceptable; pick the one with fewer cascading changes. The handler returned must still be the `loggingMiddleware`-wrapped mux.
@@ -25,7 +25,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T2 — Implement handleReadyz + register route
 
-- [ ] **Files:** `internal/server/server.go` (handler + registration)
+- [x] **Files:** `internal/server/server.go` (handler + registration)
 - Add `func (s *server) handleReadyz(w http.ResponseWriter, r *http.Request)`:
   - If `!s.ready.Load()` → `writeJSON(w, 503, map[string]string{"status":"not ready","reason":"store loading"})`.
   - Else → `writeJSON(w, 200, map[string]string{"status":"ok"})`.
@@ -36,7 +36,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T3 — Wire SetReady in main.go
 
-- [ ] **Files:** `cmd/moviesx/main.go`
+- [x] **Files:** `cmd/moviesx/main.go`
 - Update the call to `server.New()` to capture the server pointer (or readyFn).
 - Call `s.SetReady()` (or `readyFn()`) immediately after `store.Load()` succeeds and before `http.ListenAndServe(...)`. Because load is synchronous today, the pod is ready from the first request.
 - **Exit:** Starting the binary locally and hitting `/readyz` returns `{"status":"ok"}` immediately.
@@ -45,7 +45,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T4 — Update Deployment readinessProbe to /readyz
 
-- [ ] **Files:** `k8s/base/deployment.yaml`
+- [x] **Files:** `k8s/base/deployment.yaml`
 - Change `readinessProbe.httpGet.path` from `/healthz` to `/readyz`.
 - Add `periodSeconds: 5` and `failureThreshold: 3` to the readinessProbe block (currently missing; align with research recommendation).
 - Add the same `periodSeconds: 10` / `failureThreshold: 3` to `livenessProbe` for completeness.
@@ -57,7 +57,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T5 — Add swag dependencies + Makefile target
 
-- [ ] **Files:** `go.mod`, `go.sum`, `tools.go` (new file at module root), `Makefile`
+- [x] **Files:** `go.mod`, `go.sum`, `tools.go` (new file at module root), `Makefile`
 - Create `tools.go` with build tag `//go:build tools` and blank imports for the swag CLI and http-swagger runtime:
   ```go
   //go:build tools
@@ -83,7 +83,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T6 — Global swag annotations in main.go
 
-- [ ] **Files:** `cmd/moviesx/main.go`
+- [x] **Files:** `cmd/moviesx/main.go`
 - Add the global swag comment block immediately before the `main()` function:
   ```go
   // @title          moviesx API
@@ -100,7 +100,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T7 — Per-handler swag annotations on all §6 endpoints
 
-- [ ] **Files:** `internal/server/server.go` (version, healthz, readyz), `internal/server/genres.go`, `internal/server/movies.go`, `internal/server/actors.go`
+- [x] **Files:** `internal/server/server.go` (version, healthz, readyz), `internal/server/genres.go`, `internal/server/movies.go`, `internal/server/actors.go`
 - Add godoc annotation blocks above each of the following handlers. Every block must include at minimum `@Summary`, `@Tags`, `@Produce`, `@Success`, and `@Router`. Add `@Param` lines for each query parameter. Add `@Failure 400` for endpoints with validation; `@Failure 404` for by-ID endpoints.
 
   | Handler | @Tags | @Router |
@@ -127,7 +127,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T8 — Commit generated docs/
 
-- [ ] **Files:** `docs/docs.go`, `docs/swagger.json`, `docs/swagger.yaml`
+- [x] **Files:** `docs/docs.go`, `docs/swagger.json`, `docs/swagger.yaml`
 - Stage and commit the generated `docs/` directory (these are committed artifacts for this project; no CI regeneration step is in scope for 0.4.0).
 - **Exit:** `git status` is clean after staging; `go build ./...` succeeds.
 
@@ -137,7 +137,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T9 — Register GET /swagger/v1/swagger.json
 
-- [ ] **Files:** `internal/server/server.go`
+- [x] **Files:** `internal/server/server.go`
 - Add an import for the generated docs package: `"github.com/mbr/moviesx/docs"` (already added in T6 as a blank import; change to named if needed, or use `swaggerFiles "github.com/swaggo/files/v2"`).
 - Register a handler that returns the raw spec JSON:
   ```go
@@ -153,7 +153,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T10 — Mount swaggo/http-swagger UI handler + redirects
 
-- [ ] **Files:** `internal/server/server.go`
+- [x] **Files:** `internal/server/server.go`
 - Import `httpSwagger "github.com/swaggo/http-swagger/v2"`.
 - Register the Swagger UI handler at the `/swagger/` prefix route:
   ```go
@@ -182,7 +182,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T11 — Add container-level securityContext to base Deployment
 
-- [ ] **Files:** `k8s/base/deployment.yaml`
+- [x] **Files:** `k8s/base/deployment.yaml`
 - Under `spec.template.spec.containers[0]`, add:
   ```yaml
   securityContext:
@@ -206,7 +206,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T12 — Create k8s/base/networkpolicy.yaml
 
-- [ ] **Files:** `k8s/base/networkpolicy.yaml` (new file)
+- [x] **Files:** `k8s/base/networkpolicy.yaml` (new file)
 - Create a single `NetworkPolicy` named `moviesx-ingress-egress` in the `default` namespace targeting `app: moviesx` pods, with `policyTypes: [Ingress, Egress]`.
 - **Ingress rules:**
   1. Allow from Traefik (ingress controller in `kube-system`): use `namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}` + `podSelector: {matchLabels: {app.kubernetes.io/name: traefik}}` as a **single** `from` list entry (AND logic), port 8080/TCP.
@@ -220,7 +220,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T13 — Add networkpolicy.yaml to kustomization
 
-- [ ] **Files:** `k8s/base/kustomization.yaml`
+- [x] **Files:** `k8s/base/kustomization.yaml`
 - Add `- networkpolicy.yaml` to the `resources:` list.
 - **Exit:** `kubectl kustomize k8s/base/` renders all 5 resources without error.
 
@@ -230,7 +230,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T14 — Integration tests for /readyz
 
-- [ ] **Files:** `internal/server/integration_test.go`
+- [x] **Files:** `internal/server/integration_test.go`
 - Add test `TestReadyz`:
   - Create server with `server.New()` but do **not** call `SetReady()` → `GET /readyz` must return 503 with body containing `"not ready"`.
   - Call `SetReady()` → `GET /readyz` must return 200 with body containing `"ok"`.
@@ -240,7 +240,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T15 — Integration tests for new routes (GET /, GET /swagger, /swagger/v1/swagger.json)
 
-- [ ] **Files:** `internal/server/integration_test.go`
+- [x] **Files:** `internal/server/integration_test.go`
 - Add test `TestSwaggerRoutes`:
   - `GET /` returns 301 with `Location: /swagger`.
   - `GET /swagger` returns 301 with `Location: /swagger/`.
@@ -252,7 +252,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T16 — Full test suite + coverage gate
 
-- [ ] **Files:** none (gate check only)
+- [x] **Files:** none (gate check only)
 - Run `make test` — must pass with ≥80% coverage (current baseline: 90.3%; new routes should not regress this).
 - Fix any coverage gaps if the gate drops below 80%.
 - **Exit:** `make test` exits 0 with coverage ≥80%.
@@ -261,7 +261,7 @@ Run Groups 1–3 first since they produce the routes that Group 6 verifies.
 
 ### T17 — Build + deploy smoke test
 
-- [ ] **Files:** none (ops verification)
+- [x] **Files:** none (ops verification)
 - Bump version string in `cmd/moviesx/main.go` to `"0.4.0"`.
 - Run full deploy inner loop from CLAUDE.md §Build & Deploy Inner Loop (replace tag `0.3.0` with `0.4.0`).
 - Smoke test from k3d exec:
