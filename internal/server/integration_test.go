@@ -2,8 +2,10 @@ package server_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/mbr/moviesx/internal/server"
@@ -526,5 +528,48 @@ func TestActors_InvalidQ(t *testing.T) {
 	}
 	if body["error"] == nil {
 		t.Error("error field missing")
+	}
+}
+
+// --- GET /metrics ---
+
+func TestMetrics_OK(t *testing.T) {
+	srv := newTestServer(t)
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL + "/metrics")
+	if err != nil {
+		t.Fatalf("GET /metrics: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want 200", resp.StatusCode)
+	}
+	ct := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(ct, "text/plain") {
+		t.Errorf("Content-Type = %q, want text/plain prefix", ct)
+	}
+}
+
+func TestMetrics_CounterIncrements(t *testing.T) {
+	srv := newTestServer(t)
+	defer srv.Close()
+
+	// Trigger at least one instrumented request.
+	if _, err := http.Get(srv.URL + "/api/genres"); err != nil {
+		t.Fatalf("GET /api/genres: %v", err)
+	}
+
+	resp, err := http.Get(srv.URL + "/metrics")
+	if err != nil {
+		t.Fatalf("GET /metrics: %v", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("read /metrics body: %v", err)
+	}
+	if !strings.Contains(string(body), "http_requests_total{") {
+		t.Error("/metrics body does not contain http_requests_total{")
 	}
 }

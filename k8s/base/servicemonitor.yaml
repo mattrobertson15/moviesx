@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: moviesx
+  labels:
+    app: moviesx
+spec:
+  selector:
+    matchLabels:
+      app: moviesx
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

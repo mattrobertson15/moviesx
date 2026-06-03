@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mbr/moviesx/internal/store"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type server struct {
@@ -13,20 +14,21 @@ type server struct {
 	store   *store.Store
 }
 
-// New registers all routes and returns the HTTP mux.
-func New(version string, st *store.Store) *http.ServeMux {
+// New registers all routes and returns an HTTP handler.
+func New(version string, st *store.Store) http.Handler {
 	s := &server{version: version, store: st}
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /version", s.handleVersion)
-	mux.HandleFunc("GET /healthz", s.handleHealthz)
-	mux.HandleFunc("GET /api/genres", s.handleGenres)
-	mux.HandleFunc("GET /api/movies", s.handleMovies)
-	mux.HandleFunc("GET /api/movies/{id}", s.handleMovieByID)
-	mux.HandleFunc("GET /api/actors", s.handleActors)
-	mux.HandleFunc("GET /api/actors/{id}", s.handleActorByID)
+	mux.Handle("GET /version", instrumentedHandler("version", http.HandlerFunc(s.handleVersion)))
+	mux.Handle("GET /healthz", instrumentedHandler("healthz", http.HandlerFunc(s.handleHealthz)))
+	mux.Handle("GET /api/genres", instrumentedHandler("api_genres", http.HandlerFunc(s.handleGenres)))
+	mux.Handle("GET /api/movies", instrumentedHandler("api_movies", http.HandlerFunc(s.handleMovies)))
+	mux.Handle("GET /api/movies/{id}", instrumentedHandler("api_movies_id", http.HandlerFunc(s.handleMovieByID)))
+	mux.Handle("GET /api/actors", instrumentedHandler("api_actors", http.HandlerFunc(s.handleActors)))
+	mux.Handle("GET /api/actors/{id}", instrumentedHandler("api_actors_id", http.HandlerFunc(s.handleActorByID)))
+	mux.Handle("GET /metrics", promhttp.Handler())
 
-	return mux
+	return loggingMiddleware(mux)
 }
 
 func (s *server) handleVersion(w http.ResponseWriter, r *http.Request) {

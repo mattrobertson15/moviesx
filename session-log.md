@@ -175,7 +175,7 @@ Implemented API changes and testing. API wired and gets movies, actors, genres, 
 - Review: `.copilot-tracking/2026-06-02-observability-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min? YEs
+- Will this plan fit in 90–120 min? Yes
 - Smallest cut if no: defer Kustomize restructure (keep flat k8s/ for now, add base/overlays in Session 4); ship metrics + logging + Grafana ConfigMap only
 - Decision: Proceed
 
@@ -184,27 +184,27 @@ Implemented API changes and testing. API wired and gets movies, actors, genres, 
 - Parking lot:
 
 **Close ritual**
-- [ ] Tests green
+- [x] Tests green (90.3% coverage, gate 80%)
 - [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
 - [ ] Tag (`git tag 0.3.0 && git push origin 0.3.0`)
-- [ ] Repo memory updated (CLAUDE.md session map + metric names + logging decisions)
+- [x] Repo memory updated (CLAUDE.md session map + metric names + logging decisions + deploy inner loop)
 - [ ] End time written in the moment
 - [ ] Git timestamp cross-check done now
 - [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
-- [ ] Next session starter:
+- [ ] Next session starter: Implement /readyz deep readiness + OpenAPI/Swagger doc generation (0.4.0 scope).
 
 **End time:**
 **Total focus minutes:**
 **Tag shipped:** 0.3.0
 
 **One-paragraph summary**
-
+Added Prometheus metrics middleware (`http_requests_total`, `http_request_duration_seconds`, `http_requests_in_flight`), `/metrics` endpoint, and per-request JSON logging via slog. Restructured k8s/ to Kustomize base/overlays/dev. Wired ServiceMonitor and Grafana dashboard JSON. Verified Prometheus target UP and `rate(http_requests_total[1m])` non-empty; Grafana API confirmed dashboard loaded. Key decisions: go 1.23 bump (prometheus dep requires it), Dockerfile gains `COPY --from=builder /src/src/data /data` (data files were never in the image), Prometheus CR patched to `serviceMonitorSelector: {}`.
 
 **Health signal**
-- Framing quality (1–5):
-- Drift (yes/no):
-- Fit check honest (yes/no):
-- Close complete (yes/no):
+- Framing quality (1–5): 5
+- Drift (yes/no): no
+- Fit check honest (yes/no): yes
+- Close complete (yes/no): partial — merge/tag/end-time pending user close ritual
 
 ---
 

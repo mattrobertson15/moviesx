@@ -1,0 +1,46 @@
+# kube-prometheus-stack Helm values for k3d dev cluster
+# Helm release name: kube-prom  namespace: monitoring
+
+# Disable components that don't exist in k3d
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+defaultRules:
+  rules:
+    etcd: false
+    kubeControllerManager: false
+    kubeScheduler: false
+    kubeProxy: false
+
+alertmanager:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 1d
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+    # Pick up all ServiceMonitors regardless of labels (no release: kube-prom required)
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+
+grafana:
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
