@@ -7,4 +7,4 @@ patches:
   - path: patches/dev-patch.yaml
 images:
   - name: moviesx
-    newTag: "0.3.0"
+    newTag: "0.4.0"

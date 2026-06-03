@@ -5,13 +5,20 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/mbr/moviesx/docs"
 	"github.com/mbr/moviesx/internal/config"
 	"github.com/mbr/moviesx/internal/server"
 	"github.com/mbr/moviesx/internal/store"
 )
 
-var version = "0.3.0"
+var version = "0.4.0"
 
+// @title          moviesx API
+// @version        0.4.0
+// @description    Read-only movie catalog API
+// @host           localhost:8080
+// @BasePath       /
+// @schemes        http
 func main() {
 	cfg := config.Load()
 
@@ -32,7 +39,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	h := server.New(version, st)
+	srv, h := server.New(version, st)
+	srv.SetReady()
 	if err := http.ListenAndServe(":"+cfg.Port, h); err != nil {
 		slog.Error("server error", "err", err)
 		os.Exit(1)

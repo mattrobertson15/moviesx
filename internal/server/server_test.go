@@ -7,7 +7,7 @@ import (
 )
 
 func TestVersionHandler(t *testing.T) {
-	mux := New("0.1.0", nil)
+	_, mux := New("0.1.0", nil)
 	req := httptest.NewRequest(http.MethodGet, "/version", nil)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
@@ -24,7 +24,7 @@ func TestVersionHandler(t *testing.T) {
 }
 
 func TestHealthzHandler(t *testing.T) {
-	mux := New("0.1.0", nil)
+	_, mux := New("0.1.0", nil)
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)

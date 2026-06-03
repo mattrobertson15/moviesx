@@ -1,4 +1,4 @@
-.PHONY: test build
+.PHONY: test build swagger
 
 test:
 	go test -coverprofile=coverage.out ./...
@@ -13,3 +13,9 @@ test:
 
 build:
 	CGO_ENABLED=0 GOOS=linux go build -o moviesx ./cmd/moviesx
+
+swagger:
+	go run github.com/swaggo/swag/cmd/swag init \
+		-g cmd/moviesx/main.go \
+		--parseDependency --parseInternal \
+		-o docs

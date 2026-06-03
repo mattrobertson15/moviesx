@@ -20,7 +20,8 @@ func newTestServer(t *testing.T) *httptest.Server {
 	if err != nil {
 		t.Fatalf("store.Load: %v", err)
 	}
-	return httptest.NewServer(server.New("test", st))
+	_, h := server.New("test", st)
+	return httptest.NewServer(h)
 }
 
 func getJSON(t *testing.T, srv *httptest.Server, path string) (int, map[string]any) {
@@ -528,6 +529,125 @@ func TestActors_InvalidQ(t *testing.T) {
 	}
 	if body["error"] == nil {
 		t.Error("error field missing")
+	}
+}
+
+// --- GET /readyz ---
+
+func TestReadyz(t *testing.T) {
+	st, err := store.Load(fixtureDir)
+	if err != nil {
+		t.Fatalf("store.Load: %v", err)
+	}
+	srv, h := server.New("test", st)
+	ts := httptest.NewServer(h)
+	defer ts.Close()
+
+	// Before SetReady: expect 503 with "not ready"
+	resp, err := http.Get(ts.URL + "/readyz")
+	if err != nil {
+		t.Fatalf("GET /readyz: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusServiceUnavailable {
+		t.Errorf("pre-ready status = %d, want 503", resp.StatusCode)
+	}
+	var body map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("decode pre-ready body: %v", err)
+	}
+	if body["status"] != "not ready" {
+		t.Errorf("pre-ready status field = %v, want \"not ready\"", body["status"])
+	}
+
+	// After SetReady: expect 200 with "ok"
+	srv.SetReady()
+	resp2, err := http.Get(ts.URL + "/readyz")
+	if err != nil {
+		t.Fatalf("GET /readyz after ready: %v", err)
+	}
+	defer resp2.Body.Close()
+	if resp2.StatusCode != http.StatusOK {
+		t.Errorf("post-ready status = %d, want 200", resp2.StatusCode)
+	}
+	var body2 map[string]any
+	if err := json.NewDecoder(resp2.Body).Decode(&body2); err != nil {
+		t.Fatalf("decode post-ready body: %v", err)
+	}
+	if body2["status"] != "ok" {
+		t.Errorf("post-ready status field = %v, want \"ok\"", body2["status"])
+	}
+}
+
+// --- Swagger routes ---
+
+func TestSwaggerRoutes(t *testing.T) {
+	srv := newTestServer(t)
+	defer srv.Close()
+
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse // don't follow redirects
+		},
+	}
+
+	// GET / → 301 to /swagger
+	resp, err := client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatalf("GET /: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusMovedPermanently {
+		t.Errorf("GET / status = %d, want 301", resp.StatusCode)
+	}
+	if loc := resp.Header.Get("Location"); loc != "/swagger" {
+		t.Errorf("GET / Location = %q, want /swagger", loc)
+	}
+
+	// GET /swagger → 301 to /swagger/
+	resp, err = client.Get(srv.URL + "/swagger")
+	if err != nil {
+		t.Fatalf("GET /swagger: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusMovedPermanently {
+		t.Errorf("GET /swagger status = %d, want 301", resp.StatusCode)
+	}
+	if loc := resp.Header.Get("Location"); loc != "/swagger/" {
+		t.Errorf("GET /swagger Location = %q, want /swagger/", loc)
+	}
+
+	// GET /swagger/index.html → 200 with text/html (http-swagger redirects /swagger/ to index.html)
+	resp, err = http.Get(srv.URL + "/swagger/index.html")
+	if err != nil {
+		t.Fatalf("GET /swagger/index.html: %v", err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("GET /swagger/index.html status = %d, want 200", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(ct, "text/html") {
+		t.Errorf("GET /swagger/index.html Content-Type = %q, want text/html", ct)
+	}
+
+	// GET /swagger/v1/swagger.json → 200 with valid JSON containing "info"
+	resp, err = client.Get(srv.URL + "/swagger/v1/swagger.json")
+	if err != nil {
+		t.Fatalf("GET /swagger/v1/swagger.json: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("GET /swagger/v1/swagger.json status = %d, want 200", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(ct, "application/json") {
+		t.Errorf("GET /swagger/v1/swagger.json Content-Type = %q, want application/json", ct)
+	}
+	var specBody map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&specBody); err != nil {
+		t.Fatalf("decode swagger.json: %v", err)
+	}
+	if specBody["info"] == nil {
+		t.Error("swagger.json missing \"info\" key")
 	}
 }
 

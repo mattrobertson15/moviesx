@@ -5,3 +5,4 @@ resources:
   - service.yaml
   - servicemonitor.yaml
   - grafana-dashboard-configmap.yaml
+  - networkpolicy.yaml

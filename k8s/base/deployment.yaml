@@ -17,12 +17,19 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: moviesx
           image: moviesx:dev
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
           env:
             - name: MOVIES_PORT
               value: "8080"
@@ -35,8 +42,12 @@ spec:
               path: /healthz
               port: 8080
             initialDelaySeconds: 2
+            periodSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /readyz
               port: 8080
             initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 3

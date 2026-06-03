@@ -8,6 +8,20 @@ import (
 	"github.com/mbr/moviesx/internal/validate"
 )
 
+// handleMovies godoc
+// @Summary     List movies
+// @Tags        movies
+// @Produce     json
+// @Param       q          query  string  false  "Title search substring (min 2 chars)"
+// @Param       genre      query  string  false  "Genre filter"
+// @Param       year       query  int     false  "Release year"
+// @Param       rating     query  number  false  "Minimum rating"
+// @Param       actorId    query  string  false  "Filter by actor ID"
+// @Param       pageNumber query  int     false  "Page number (default 1)"
+// @Param       pageSize   query  int     false  "Page size (default 20, max 100)"
+// @Success     200 {object} store.Page[store.MovieListItem]
+// @Failure     400 {object} map[string]string
+// @Router      /api/movies [get]
 func (s *server) handleMovies(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if _, err := validate.Q(q); err != nil {
@@ -72,6 +86,15 @@ func (s *server) handleMovies(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleMovieByID godoc
+// @Summary     Get movie by ID
+// @Tags        movies
+// @Produce     json
+// @Param       id  path  string  true  "Movie ID (e.g. tt0000001)"
+// @Success     200 {object} store.MovieDetail
+// @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
+// @Router      /api/movies/{id} [get]
 func (s *server) handleMovieByID(w http.ResponseWriter, r *http.Request) {
 	id, err := validate.MovieID(r.PathValue("id"))
 	if err != nil {

@@ -8,6 +8,16 @@ import (
 	"github.com/mbr/moviesx/internal/validate"
 )
 
+// handleActors godoc
+// @Summary     List actors
+// @Tags        actors
+// @Produce     json
+// @Param       q          query  string  false  "Name search substring (min 2 chars)"
+// @Param       pageNumber query  int     false  "Page number (default 1)"
+// @Param       pageSize   query  int     false  "Page size (default 20, max 100)"
+// @Success     200 {object} store.Page[store.Actor]
+// @Failure     400 {object} map[string]string
+// @Router      /api/actors [get]
 func (s *server) handleActors(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if _, err := validate.Q(q); err != nil {
@@ -56,6 +66,15 @@ func (s *server) handleActors(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleActorByID godoc
+// @Summary     Get actor by ID
+// @Tags        actors
+// @Produce     json
+// @Param       id  path  string  true  "Actor ID (e.g. nm0000001)"
+// @Success     200 {object} store.Actor
+// @Failure     400 {object} map[string]string
+// @Failure     404 {object} map[string]string
+// @Router      /api/actors/{id} [get]
 func (s *server) handleActorByID(w http.ResponseWriter, r *http.Request) {
 	id, err := validate.ActorPathID(r.PathValue("id"))
 	if err != nil {
