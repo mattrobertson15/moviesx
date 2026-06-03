@@ -224,7 +224,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Review: `.copilot-tracking/2026-06-03-openapi-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min? YEs
+- Will this plan fit in 90–120 min? Yes
 - Smallest cut if no: defer NetworkPolicy to Session 5 gap-close; ship OpenAPI + /readyz + securityContext only
 - Decision: Proceed
 
@@ -233,10 +233,59 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Parking lot:
 
 **Close ritual**
+- [ x ] Tests green
+- [ x ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ x ] Tag (`git tag 0.4.0 && git push origin 0.4.0`)
+- [ x ] Repo memory updated (CLAUDE.md session map + OpenAPI approach decision)
+- [ x ] End time written in the moment
+- [ x ] Git timestamp cross-check done now
+- [ x ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ x ] Next session starter: ession 5 builds the custom HTTP replay tool — baseline functional suite + benchmark mode
+
+**End time:** 18:38
+**Total focus minutes:** 77
+**Tag shipped:** 0.4.0
+
+**One-paragraph summary**
+
+
+**Health signal**
+- Framing quality (1–5): 5
+- Drift (yes/no): No
+- Fit check honest (yes/no): Yes
+- Close complete (yes/no): Yes
+
+---
+
+## Session 5 — 2026-06-03
+
+**Frame**
+- Goal: Custom HTTP replay tool — baseline functional suite (all §6 endpoints + negative validation cases) + benchmark mode (sustained load, p95 + error rate), tagged `0.5.0`
+- Out of scope: actorId/rating filters, NetworkPolicy (if deferred), inner-loop README, any API changes
+- Failure condition: uses an off-the-shelf load tool (k6, Vegeta, hey, etc.); baseline suite doesn't cover every §6 endpoint; benchmark mode doesn't report p95 latency and error rate
+
+**Start time:** *(write this the instant the frame is done — not later)*
+
+**RPI cycle**
+- Research: `.copilot-tracking/2026-06-03-replay-research.md`
+- Plan: `.copilot-tracking/2026-06-03-replay-plan.md`
+- Changes: `.copilot-tracking/2026-06-03-replay-changes.md`
+- Review: `.copilot-tracking/2026-06-03-replay-review.md`
+
+**Fit check**
+- Will this plan fit in 90–120 min?
+- Smallest cut if no: ship baseline functional suite only in 0.5.0; benchmark mode in 0.5.1
+- Decision:
+
+**During**
+- Drift moments:
+- Parking lot:
+
+**Close ritual**
 - [ ] Tests green
 - [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
-- [ ] Tag (`git tag 0.4.0 && git push origin 0.4.0`)
-- [ ] Repo memory updated (CLAUDE.md session map + OpenAPI approach decision)
+- [ ] Tag (`git tag 0.5.0 && git push origin 0.5.0`)
+- [ ] Repo memory updated (CLAUDE.md session map + tool design decisions)
 - [ ] End time written in the moment
 - [ ] Git timestamp cross-check done now
 - [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
@@ -244,7 +293,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 
 **End time:**
 **Total focus minutes:**
-**Tag shipped:** 0.4.0
+**Tag shipped:** 0.5.0
 
 **One-paragraph summary**
 
