@@ -180,21 +180,21 @@ Implemented API changes and testing. API wired and gets movies, actors, genres, 
 - Decision: Proceed
 
 **During**
-- Drift moments:
+- Drift moments: Didn't finish and went to bed
 - Parking lot:
 
 **Close ritual**
 - [x] Tests green (90.3% coverage, gate 80%)
-- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
-- [ ] Tag (`git tag 0.3.0 && git push origin 0.3.0`)
+- [ x ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ x ] Tag (`git tag 0.3.0 && git push origin 0.3.0`)
 - [x] Repo memory updated (CLAUDE.md session map + metric names + logging decisions + deploy inner loop)
-- [ ] End time written in the moment
-- [ ] Git timestamp cross-check done now
-- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
-- [ ] Next session starter: Implement /readyz deep readiness + OpenAPI/Swagger doc generation (0.4.0 scope).
+- [ x ] End time written in the moment
+- [ x ] Git timestamp cross-check done now
+- [ x ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ x ] Next session starter: Implement /readyz deep readiness + OpenAPI/Swagger doc generation (0.4.0 scope).
 
-**End time:**
-**Total focus minutes:**
+**End time:** 13:45
+**Total focus minutes:** 120
 **Tag shipped:** 0.3.0
 
 **One-paragraph summary**
