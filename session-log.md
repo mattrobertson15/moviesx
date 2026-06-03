@@ -224,9 +224,9 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Review: `.copilot-tracking/2026-06-03-openapi-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min?
+- Will this plan fit in 90–120 min? YEs
 - Smallest cut if no: defer NetworkPolicy to Session 5 gap-close; ship OpenAPI + /readyz + securityContext only
-- Decision:
+- Decision: Proceed
 
 **During**
 - Drift moments:
