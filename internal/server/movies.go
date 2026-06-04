@@ -44,8 +44,17 @@ func (s *server) handleMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := validate.Rating(r.URL.Query().Get("rating")); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if _, err := validate.ActorID(r.URL.Query().Get("actorId")); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	genre := r.URL.Query().Get("genre")
-	// actorId and rating filters are in the Parking Lot (not implemented in 0.2.0).
+	// rating and actorId filters are in the Parking Lot (not implemented in 0.2.0).
 
 	movies := s.store.AllMovies()
 	filtered := make([]*store.Movie, 0, len(movies))

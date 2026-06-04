@@ -264,7 +264,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Out of scope: actorId/rating filters, NetworkPolicy (if deferred), inner-loop README, any API changes
 - Failure condition: uses an off-the-shelf load tool (k6, Vegeta, hey, etc.); baseline suite doesn't cover every §6 endpoint; benchmark mode doesn't report p95 latency and error rate
 
-**Start time:** *(write this the instant the frame is done — not later)*
+**Start time:** *(w18:45)*
 
 **RPI cycle**
 - Research: `.copilot-tracking/2026-06-03-replay-research.md`
@@ -273,9 +273,9 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Review: `.copilot-tracking/2026-06-03-replay-review.md`
 
 **Fit check**
-- Will this plan fit in 90–120 min?
+- Will this plan fit in 90–120 min? Yes
 - Smallest cut if no: ship baseline functional suite only in 0.5.0; benchmark mode in 0.5.1
-- Decision:
+- Decision: Proceed
 
 **During**
 - Drift moments:

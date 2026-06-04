@@ -1,0 +1,25 @@
+# scenarios/benchmark.yaml
+# Benchmark scenario suite for moviesx sustained-load testing (spec §10.4).
+#
+# Two scenarios, looped round-robin at 50/50 split by the benchmark runner:
+#   bench-movies-list  — GET /api/movies      p95 target: < 50ms
+#   bench-movies-by-id — GET /api/movies/{id}  p95 target: < 10ms
+#
+# Run with: make bench BASE_URL=http://<pod-ip>:8080
+# The benchmark runner resolves {known_movie_id} by calling /api/movies?pageSize=1 at startup.
+
+scenarios:
+
+  - id: bench-movies-list
+    method: GET
+    path: /api/movies
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: bench-movies-by-id
+    method: GET
+    path: /api/movies/{known_movie_id}
+    expect_status: 200
+    assert:
+      has_keys: [id, title, year]

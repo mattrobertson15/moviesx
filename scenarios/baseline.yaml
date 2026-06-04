@@ -1,0 +1,453 @@
+# scenarios/baseline.yaml
+# Baseline scenario suite for moviesx HTTP replay tool.
+# Covers: happy path (24), validation failures (28), not-found (2) = 54 total.
+#
+# Template variables resolved at startup via DiscoverIDs:
+#   {known_movie_id} — first movie ID from GET /api/movies?pageSize=1
+#   {known_actor_id} — first actor ID from GET /api/actors?pageSize=1
+
+scenarios:
+
+  # ── Happy Path (24 scenarios) ──────────────────────────────────────────────
+
+  - id: healthz-pass
+    method: GET
+    path: /healthz
+    expect_status: 200
+    assert:
+      body_contains_string: "pass"
+
+  - id: version-semver
+    method: GET
+    path: /version
+    expect_status: 200
+    assert:
+      body_matches_regex: "^\\d+\\.\\d+\\.\\d+$"
+
+  - id: readyz-ready
+    method: GET
+    path: /readyz
+    expect_status: 200
+    assert:
+      body_contains:
+        status: ok
+
+  - id: genres-list
+    method: GET
+    path: /api/genres
+    expect_status: 200
+    assert:
+      is_array: true
+      array_min_length: 1
+
+  - id: movies-default
+    method: GET
+    path: /api/movies
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-q-match
+    method: GET
+    path: /api/movies
+    query: {q: "the"}   # common word — expect at least one match
+    expect_status: 200
+    assert:
+      body_min_items: 1
+
+  - id: movies-q-no-match
+    method: GET
+    path: /api/movies
+    query: {q: zzzzzzzz}   # unlikely to match any title
+    expect_status: 200
+    assert:
+      body_contains:
+        total: 0
+
+  - id: movies-genre-filter
+    method: GET
+    path: /api/movies
+    query: {genre: Drama}
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-year-filter
+    method: GET
+    path: /api/movies
+    query: {year: "2001"}
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-year-edge-low
+    method: GET
+    path: /api/movies
+    query: {year: "1888"}   # minimum valid year
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-year-edge-high
+    method: GET
+    path: /api/movies
+    query: {year: "2100"}   # maximum valid year
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-rating-filter
+    method: GET
+    path: /api/movies
+    query: {rating: "1.0"}   # minimum valid rating
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-rating-max
+    method: GET
+    path: /api/movies
+    query: {rating: "10.0"}   # maximum valid rating
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: movies-pagination
+    method: GET
+    path: /api/movies
+    query: {pageSize: "5", pageNumber: "1"}
+    expect_status: 200
+    assert:
+      body_contains:
+        page: 1
+        pageSize: 5
+
+  - id: movies-page-beyond
+    method: GET
+    path: /api/movies
+    query: {pageSize: "1", pageNumber: "9999"}   # beyond dataset — items will be empty
+    expect_status: 200
+    assert:
+      body_contains:
+        page: 9999
+        pageSize: 1
+
+  - id: movies-by-id
+    method: GET
+    path: /api/movies/{known_movie_id}
+    expect_status: 200
+    assert:
+      has_keys: [id, title, year, runtime, genres, roles, rating, votes]
+
+  - id: actors-default
+    method: GET
+    path: /api/actors
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: actors-q-match
+    method: GET
+    path: /api/actors
+    query: {q: "jo"}   # matches John, Jones, etc.
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  - id: actors-q-no-match
+    method: GET
+    path: /api/actors
+    query: {q: zzzzzzzzz}
+    expect_status: 200
+    assert:
+      body_contains:
+        total: 0
+
+  - id: actors-pagination
+    method: GET
+    path: /api/actors
+    query: {pageSize: "3", pageNumber: "1"}
+    expect_status: 200
+    assert:
+      body_contains:
+        pageSize: 3
+
+  - id: actors-by-id
+    method: GET
+    path: /api/actors/{known_actor_id}
+    expect_status: 200
+    assert:
+      has_keys: [id, name, birthYear, profession, movies]
+
+  - id: metrics-exposition
+    method: GET
+    path: /metrics
+    expect_status: 200
+    assert:
+      body_contains_string: "http_requests_total"
+
+  - id: swagger-json
+    method: GET
+    path: /swagger/v1/swagger.json
+    expect_status: 200
+    assert:
+      has_keys: [info, paths]
+
+  - id: root-redirect
+    method: GET
+    path: /
+    expect_status: 301
+    expect_headers:
+      Location: /swagger
+
+  # ── Validation Failures (400) ──────────────────────────────────────────────
+
+  # q length: valid range [2, 20]
+
+  - id: movies-q-too-short
+    method: GET
+    path: /api/movies
+    query: {q: a}   # 1 char — below minimum 2
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-q-too-long
+    method: GET
+    path: /api/movies
+    query: {q: aaaaaaaaaaaaaaaaaaaaa}   # 21 chars — above maximum 20
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-q-too-short
+    method: GET
+    path: /api/actors
+    query: {q: x}   # 1 char
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-q-too-long
+    method: GET
+    path: /api/actors
+    query: {q: aaaaaaaaaaaaaaaaaaaaa}   # 21 chars
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # pageNumber: valid range [1, 10000]
+
+  - id: movies-pageno-zero
+    method: GET
+    path: /api/movies
+    query: {pageNumber: "0"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-pageno-negative
+    method: GET
+    path: /api/movies
+    query: {pageNumber: "-1"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-pageno-too-high
+    method: GET
+    path: /api/movies
+    query: {pageNumber: "10001"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-pageno-zero
+    method: GET
+    path: /api/actors
+    query: {pageNumber: "0"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-pageno-too-high
+    method: GET
+    path: /api/actors
+    query: {pageNumber: "10001"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # pageSize: valid range [1, 1000]
+
+  - id: movies-pagesize-zero
+    method: GET
+    path: /api/movies
+    query: {pageSize: "0"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-pagesize-too-high
+    method: GET
+    path: /api/movies
+    query: {pageSize: "1001"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-pagesize-zero
+    method: GET
+    path: /api/actors
+    query: {pageSize: "0"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-pagesize-too-high
+    method: GET
+    path: /api/actors
+    query: {pageSize: "1001"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # year: valid range [1888, 2100]
+
+  - id: movies-year-too-low
+    method: GET
+    path: /api/movies
+    query: {year: "1887"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-year-too-high
+    method: GET
+    path: /api/movies
+    query: {year: "2101"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-year-non-integer
+    method: GET
+    path: /api/movies
+    query: {year: abc}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # rating: valid range [1.0, 10.0]
+
+  - id: movies-rating-too-low
+    method: GET
+    path: /api/movies
+    query: {rating: "0.9"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-rating-too-high
+    method: GET
+    path: /api/movies
+    query: {rating: "10.1"}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-rating-non-numeric
+    method: GET
+    path: /api/movies
+    query: {rating: great}
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # actorId format: ^nm\d{5,9}$
+
+  - id: movies-actorid-bad-prefix
+    method: GET
+    path: /api/movies
+    query: {actorId: tt0000001}   # wrong prefix — must start with nm
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-actorid-too-short
+    method: GET
+    path: /api/movies
+    query: {actorId: nm1234}   # 4 digits — minimum is 5
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-actorid-too-long
+    method: GET
+    path: /api/movies
+    query: {actorId: nm1234567890}   # 10 digits — maximum is 9
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-actorid-not-numeric
+    method: GET
+    path: /api/movies
+    query: {actorId: nmABCDE}   # non-digit characters after nm
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-actorid-valid-deferred
+    method: GET
+    path: /api/movies
+    query: {actorId: nm0000001}   # valid format — filter is no-op (deferred per parking lot)
+    expect_status: 200
+    assert:
+      has_keys: [items, total, page, pageSize]
+
+  # Path parameter format validation
+
+  - id: movies-id-bad-format
+    method: GET
+    path: /api/movies/not-an-id   # not a valid tt-prefix ID
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: movies-id-nm-prefix
+    method: GET
+    path: /api/movies/nm0000001   # actor ID used as movie ID — wrong prefix
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-id-bad-format
+    method: GET
+    path: /api/actors/not-an-id
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  - id: actors-id-tt-prefix
+    method: GET
+    path: /api/actors/tt0000001   # movie ID used as actor ID — wrong prefix
+    expect_status: 400
+    assert:
+      has_keys: [error]
+
+  # ── Not Found (404) ────────────────────────────────────────────────────────
+
+  - id: movies-id-not-found
+    method: GET
+    path: /api/movies/tt9999999   # valid format, no matching record
+    expect_status: 404
+    assert:
+      has_keys: [error]
+
+  - id: actors-id-not-found
+    method: GET
+    path: /api/actors/nm9999999   # valid format, no matching record
+    expect_status: 404
+    assert:
+      has_keys: [error]

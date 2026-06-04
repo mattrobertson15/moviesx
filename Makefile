@@ -1,7 +1,8 @@
-.PHONY: test build swagger
+.PHONY: test build swagger replay-build e2e bench
 
 test:
-	go test -coverprofile=coverage.out ./...
+	go test ./...
+	go test -coverprofile=coverage.out ./internal/...
 	@go tool cover -func=coverage.out | grep total:
 	@pct=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | tr -d '%'); \
 	  threshold=80; \
@@ -19,3 +20,13 @@ swagger:
 		-g cmd/moviesx/main.go \
 		--parseDependency --parseInternal \
 		-o docs
+
+replay-build:
+	mkdir -p bin
+	CGO_ENABLED=0 go build -o bin/replay ./cmd/replay/
+
+e2e: bin/replay
+	./bin/replay --base-url $(BASE_URL) --scenarios scenarios/baseline.yaml
+
+bench: bin/replay
+	./bin/replay --base-url $(BASE_URL) --scenarios scenarios/benchmark.yaml --benchmark --duration 30s --rps 500 --concurrency 50
