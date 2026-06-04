@@ -313,7 +313,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Out of scope: new features, actorId/rating filters, new endpoints — only gap-close and docs
 - Failure condition: any §14 checkbox still red after this session; inner-loop README not verifiable on a clean clone
 
-**Start time:** *(7:37)*
+**Start time:** *(07:37)*
 
 **RPI cycle**
 - Research: `.copilot-tracking/2026-06-04-gap-close-research.md`
@@ -341,7 +341,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - [x] RETRO.md synthesis section written (top section summarizing all session bullets)
 - [x] §14 checklist confirmed green in one-paragraph summary
 
-**End time:** 13:35
+**End time:** 08:35
 **Total focus minutes:** 358 (across session)
 **Tag shipped:** 1.0.0
 
