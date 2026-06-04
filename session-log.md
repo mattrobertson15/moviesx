@@ -306,4 +306,54 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 
 ---
 
+## Session 6 — 2026-06-04
+
+**Frame**
+- Goal: Walk §14 checklist item by item on a fresh cluster, fix every gap, write the §12 inner-loop README, tag `1.0.0`
+- Out of scope: new features, actorId/rating filters, new endpoints — only gap-close and docs
+- Failure condition: any §14 checkbox still red after this session; inner-loop README not verifiable on a clean clone
+
+**Start time:** *(7:37)*
+
+**RPI cycle**
+- Research: `.copilot-tracking/2026-06-04-gap-close-research.md`
+- Plan: `.copilot-tracking/2026-06-04-gap-close-plan.md`
+- Changes: `.copilot-tracking/2026-06-04-gap-close-changes.md`
+- Review: `.copilot-tracking/2026-06-04-gap-close-review.md`
+
+**Fit check**
+- Will this plan fit in 90–120 min?
+- Smallest cut if no: N/A — this session must close all §14 gaps; if it can't fit, scope was wrong
+- Decision:
+
+**During**
+- Drift moments:
+- Parking lot:
+
+**Close ritual**
+- [ ] Tests green
+- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ ] Tag (`git tag 1.0.0 && git push origin 1.0.0`)
+- [ ] Repo memory updated (CLAUDE.md session map marked complete)
+- [ ] End time written in the moment
+- [ ] Git timestamp cross-check done now
+- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ ] RETRO.md synthesis section written (top section summarizing all session bullets)
+- [ ] §14 checklist confirmed green in one-paragraph summary
+
+**End time:**
+**Total focus minutes:**
+**Tag shipped:** 1.0.0
+
+**One-paragraph summary**
+
+
+**Health signal**
+- Framing quality (1–5):
+- Drift (yes/no):
+- Fit check honest (yes/no):
+- Close complete (yes/no):
+
+---
+
 <!-- Copy the Session Template block above for each new session. -->
