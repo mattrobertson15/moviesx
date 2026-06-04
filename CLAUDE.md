@@ -1,7 +1,7 @@
 # CLAUDE.md — moviesx
 
 Repo memory for the movies experiment. Updated at the close of each session.
-Last updated: Session 4 (2026-06-03, tag 0.4.0).
+Last updated: Session 5 (2026-06-03, tag 0.5.0).
 
 ## Stack
 
@@ -39,7 +39,14 @@ k8s/overlays/dev/grafana-admin-secret.yaml Secret: admin / dev-password (plainte
 k8s/monitoring/kube-prom-values.yaml      Helm values for kube-prometheus-stack (k3d overrides)
 src/data/                                 movies.json, actors.json, ratings.json (baked into image at /data)
 Dockerfile                                multi-stage: golang:1.23-bookworm → distroless/static:nonroot
-Makefile                                  make test (runs tests + coverage gate), make build
+Makefile                                  make test, make build, make e2e, make bench, make replay-build
+cmd/replay/main.go                        Replay tool CLI — flag parsing, mode dispatch
+cmd/replay/scenario.go                    Scenario/AssertBlock structs + YAML loader + DiscoverIDs
+cmd/replay/runner.go                      HTTP executor, RunBaseline, RunBenchmark
+cmd/replay/assert.go                      8 assertion types (status, has_keys, body_contains, regex, etc.)
+cmd/replay/assert_test.go                 16 unit tests for all assertion paths
+scenarios/baseline.yaml                   54-scenario contract suite (happy-path + 400s + 404s)
+scenarios/benchmark.yaml                  2-scenario sustained-load suite
 ```
 
 ## Config
@@ -54,7 +61,7 @@ CLI flags deferred to a later session. Env-var config only for now.
 
 ## Key Implementation Decisions
 
-- **Version string:** `var version = "0.4.0"` in `cmd/moviesx/main.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
+- **Version string:** `var version = "0.5.0"` in `cmd/moviesx/main.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
 - **`runAsUser: 65532`** in Deployment `securityContext` — distroless nonroot UID; required because Kubernetes `runAsNonRoot` validation needs a numeric UID, not just the named user `nonroot`.
 - **`go.mod` pins `go 1.23.0`** — bumped from 1.22 by `go get prometheus/client_golang@v1.23.2` which requires go 1.23. Docker builder image updated to match (`golang:1.23-bookworm`).
 - **D1 — Response envelope:** All list endpoints return `{ "items": [...], "total": N, "page": N, "pageSize": N }`. Implemented as `Page[T any]` generic in `internal/store/types.go`.
@@ -70,6 +77,9 @@ CLI flags deferred to a later session. Env-var config only for now.
 - **Grafana dashboard provisioning:** The k3d dev cluster uses static ConfigMap volume mounts (`grafana-dashboard-movies`), not the sidecar label approach. Dashboard JSON was patched directly into that ConfigMap. The base `grafana-dashboard-configmap.yaml` is written for the sidecar approach (kube-prometheus-stack install).
 - **Data files in image:** Dockerfile copies `src/data/` → `/data` in the final image via `COPY --from=builder /src/src/data /data`. Required because the `moviesx:dev` image predates this — it was a session-1 binary without store.Load.
 - **securityContext (0.4.0):** Container-level adds `allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, `capabilities.drop: [ALL]`. Pod-level adds `seccompProfile: RuntimeDefault`. No emptyDir needed — binary makes no filesystem writes.
+- **Replay tool (0.5.0):** Lives in `cmd/replay/`. Scenario format: YAML with `scenarios:` list. Template vars `{known_movie_id}` and `{known_actor_id}` discovered at startup via `/api/movies` and `/api/actors`. 8 assertion types. Benchmark: 50-worker goroutine pool, `time.NewTicker` rate control, p95 via sort+index. 54-scenario baseline suite (all §6 endpoints + all validation 400s + 404s), 2-scenario benchmark suite.
+- **Benchmark CPU limit:** Dev overlay caps moviesx at 200m CPU; at 500 RPS this causes throttle-induced p95 spikes. Verified by temporarily removing CPU limit (`kubectl patch`). A bench-specific overlay is a future improvement (parking lot).
+- **Replay macOS reachability:** k3d pod IPs (10.42.x.x) are not directly reachable from macOS host. Run the replay binary inside the k3d container: `GOOS=linux go build -o bin/replay-linux ./cmd/replay && docker cp bin/replay-linux k3d-movies-server-0:/tmp/replay && docker exec k3d-movies-server-0 /tmp/replay --base-url http://<POD_IP>:8080 --scenarios /tmp/scenarios/baseline.yaml`
 
 ## Local Cluster
 
@@ -91,14 +101,38 @@ go test ./internal/validate/...    # validation unit tests
 go test ./internal/server/...      # server unit + integration tests (includes /metrics smoke tests)
 ```
 
-Coverage as of 0.4.0: **90.1%** total (gate: 80%).
+Coverage as of 0.5.0: **90.1%** total (gate: 80%; replay tool covered by `cmd/replay/assert_test.go`).
 
-## Build & Deploy Inner Loop (Session 4 — 0.4.0)
+## Replay Tool Usage
+
+```bash
+# Build Linux binary for in-cluster execution
+make replay-build                          # produces bin/replay-linux (GOOS=linux)
+
+# Copy scenarios + binary into k3d container
+docker cp bin/replay-linux k3d-movies-server-0:/tmp/replay
+docker cp scenarios/ k3d-movies-server-0:/tmp/scenarios
+
+POD_IP=$(docker exec k3d-movies-server-0 kubectl get pod -l app=moviesx -o jsonpath='{.items[0].status.podIP}')
+
+# Baseline (functional contract suite — 54 scenarios)
+docker exec k3d-movies-server-0 /tmp/replay \
+  --base-url http://$POD_IP:8080 \
+  --scenarios /tmp/scenarios/baseline.yaml
+
+# Benchmark (500 RPS, 30s — remove CPU limit first for accurate results)
+docker exec k3d-movies-server-0 /tmp/replay \
+  --base-url http://$POD_IP:8080 \
+  --scenarios /tmp/scenarios/benchmark.yaml \
+  --benchmark --duration 30s --concurrency 50 --rps 500
+```
+
+## Build & Deploy Inner Loop (Session 5 — 0.5.0)
 
 ```bash
 make test
 make swagger                              # regenerate docs/ if annotations changed
-docker build -t moviesx:0.4.0 .
+docker build -t moviesx:0.5.0 .
 k3d image import moviesx:0.4.0 -c movies
 
 # Apply via Kustomize dev overlay (pipes through host kubectl because k3d exec doesn't need kubeconfig)
@@ -134,7 +168,7 @@ docker exec k3d-movies-server-0 wget -qO- "http://$GRAF_IP:3000/api/dashboards/u
 | `0.2.0` | Data layer + /api/* endpoints + validation + tests ≥80% | ✅ done |
 | `0.3.0` | Prometheus metrics + structured logging + Grafana + Kustomize | ✅ done |
 | `0.4.0` | OpenAPI/Swagger + /readyz + security hardening + NetworkPolicy | ✅ done |
-| `0.5.0` | Custom HTTP replay tool (§10.3 baseline + §10.4 benchmark) | — |
+| `0.5.0` | Custom HTTP replay tool (§10.3 baseline + §10.4 benchmark) | ✅ done |
 | `1.0.0` | §14 gap close + inner-loop README + acceptance pass | — |
 
 ## Spec References

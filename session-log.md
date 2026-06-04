@@ -279,30 +279,30 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 
 **During**
 - Drift moments:
-- Parking lot:
+- Parking lot: Final performance tweaks
 
 **Close ritual**
-- [ ] Tests green
-- [ ] FF-merge (`gh pr merge --rebase --delete-branch`)
-- [ ] Tag (`git tag 0.5.0 && git push origin 0.5.0`)
-- [ ] Repo memory updated (CLAUDE.md session map + tool design decisions)
-- [ ] End time written in the moment
-- [ ] Git timestamp cross-check done now
-- [ ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
-- [ ] Next session starter:
+- [ x ] Tests green
+- [ x ] FF-merge (`gh pr merge --rebase --delete-branch`)
+- [ x ] Tag (`git tag 0.5.0 && git push origin 0.5.0`)
+- [ x ] Repo memory updated (CLAUDE.md session map + tool design decisions)
+- [ x ] End time written in the moment
+- [ x ] Git timestamp cross-check done now
+- [ x ] One-bullet entry appended to [`RETRO.md`](RETRO.md)
+- [ ] Next session starter: Session 6 is the final gap-close — walk §14 checklist, write inner-loop README, tag 1.0.0
 
-**End time:**
-**Total focus minutes:**
+**End time:** 19:35
+**Total focus minutes:** 50
 **Tag shipped:** 0.5.0
 
 **One-paragraph summary**
 
 
 **Health signal**
-- Framing quality (1–5):
-- Drift (yes/no):
-- Fit check honest (yes/no):
-- Close complete (yes/no):
+- Framing quality (1–5): 4
+- Drift (yes/no): No
+- Fit check honest (yes/no): No a little too much for performance specs
+- Close complete (yes/no): Yes
 
 ---
 

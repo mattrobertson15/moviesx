@@ -19,7 +19,7 @@
 - **Session 2 —** Went very smoothly.
 - **Session 3 —** Went well but didn't finish before having to leave terminal, was able to wrap up the next day
 - **Session 4 —** Smooth sailing
-- **Session 5 —**
+- **Session 5 —** Slightperformance tweaks next session
 - **Session 6 —**
 - **Session 7 —**
 - **Session 8 —**
