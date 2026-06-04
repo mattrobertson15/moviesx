@@ -9,6 +9,7 @@ func TestLoad(t *testing.T) {
 	tests := []struct {
 		name     string
 		env      map[string]string
+		flags    Flags
 		wantPort string
 		wantLog  string
 		wantData string
@@ -21,18 +22,33 @@ func TestLoad(t *testing.T) {
 			wantData: "/data",
 		},
 		{
-			name:     "overrides",
+			name:     "env overrides",
 			env:      map[string]string{"MOVIES_PORT": "9090", "MOVIES_LOG_LEVEL": "debug", "MOVIES_DATA_DIR": "/tmp/data"},
 			wantPort: "9090",
 			wantLog:  "debug",
 			wantData: "/tmp/data",
 		},
 		{
-			name:     "partial override",
+			name:     "partial env override",
 			env:      map[string]string{"MOVIES_PORT": "3000"},
 			wantPort: "3000",
 			wantLog:  "info",
 			wantData: "/data",
+		},
+		{
+			name:     "flags override env",
+			env:      map[string]string{"MOVIES_PORT": "9090"},
+			flags:    Flags{Port: "7777"},
+			wantPort: "7777",
+			wantLog:  "info",
+			wantData: "/data",
+		},
+		{
+			name:     "flags override defaults",
+			flags:    Flags{Port: "5000", LogLevel: "debug", DataDir: "/tmp"},
+			wantPort: "5000",
+			wantLog:  "debug",
+			wantData: "/tmp",
 		},
 	}
 
@@ -51,7 +67,7 @@ func TestLoad(t *testing.T) {
 				os.Unsetenv("MOVIES_DATA_DIR")
 			})
 
-			cfg := Load()
+			cfg := Load(tc.flags)
 			if cfg.Port != tc.wantPort {
 				t.Errorf("Port = %q, want %q", cfg.Port, tc.wantPort)
 			}

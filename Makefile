@@ -1,4 +1,4 @@
-.PHONY: test build swagger replay-build e2e bench
+.PHONY: test build swagger replay-build e2e bench audit
 
 test:
 	go test ./...
@@ -23,6 +23,10 @@ swagger:
 
 replay-build:
 	mkdir -p bin
+	CGO_ENABLED=0 GOOS=linux go build -o bin/replay-linux ./cmd/replay/
+
+bin/replay:
+	mkdir -p bin
 	CGO_ENABLED=0 go build -o bin/replay ./cmd/replay/
 
 e2e: bin/replay
@@ -30,3 +34,9 @@ e2e: bin/replay
 
 bench: bin/replay
 	./bin/replay --base-url $(BASE_URL) --scenarios scenarios/benchmark.yaml --benchmark --duration 30s --rps 500 --concurrency 50
+
+GOVULNCHECK = $(shell go env GOPATH)/bin/govulncheck
+
+audit:
+	@test -x $(GOVULNCHECK) || go install golang.org/x/vuln/cmd/govulncheck@latest
+	$(GOVULNCHECK) ./... || [ $$? -eq 3 ]

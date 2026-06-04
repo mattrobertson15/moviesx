@@ -1,11 +1,11 @@
 # CLAUDE.md — moviesx
 
 Repo memory for the movies experiment. Updated at the close of each session.
-Last updated: Session 5 (2026-06-03, tag 0.5.0).
+Last updated: Session 6 (2026-06-04, tag 1.0.0).
 
 ## Stack
 
-**Language:** Go (local toolchain: 1.26.3 via Homebrew; Docker builder pins `golang:1.23-bookworm`)  
+**Language:** Go (local toolchain: 1.26.3 via Homebrew; Docker builder pins `golang:1.25-bookworm`)  
 **Module:** `github.com/mbr/moviesx`  
 **Runtime image:** `gcr.io/distroless/static-debian12:nonroot` — static binary + data files baked at `/data`  
 **Build:** `CGO_ENABLED=0 GOOS=linux go build ./cmd/moviesx`
@@ -57,13 +57,16 @@ scenarios/benchmark.yaml                  2-scenario sustained-load suite
 | `MOVIES_LOG_LEVEL` | `info` | Minimum log level (parsed via slog.Level.UnmarshalText) |
 | `MOVIES_DATA_DIR` | `/data` | Data file directory |
 
-CLI flags deferred to a later session. Env-var config only for now.
+CLI flags implemented in 1.0.0: `--movies-port`, `--movies-log-level`, `--movies-data-dir`. Precedence: defaults < env vars < CLI flags.
 
 ## Key Implementation Decisions
 
-- **Version string:** `var version = "0.5.0"` in `cmd/moviesx/main.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
+- **Version string:** `var version = "1.0.0"` in `cmd/moviesx/main.go` — overridable via `-ldflags "-X main.version=X.Y.Z"` in future builds.
 - **`runAsUser: 65532`** in Deployment `securityContext` — distroless nonroot UID; required because Kubernetes `runAsNonRoot` validation needs a numeric UID, not just the named user `nonroot`.
-- **`go.mod` pins `go 1.23.0`** — bumped from 1.22 by `go get prometheus/client_golang@v1.23.2` which requires go 1.23. Docker builder image updated to match (`golang:1.23-bookworm`).
+- **`go.mod` pins `go 1.25.0`** — bumped from 1.23 by `go get golang.org/x/vuln` (govulncheck dep) which requires go 1.25. Docker builder image updated to match (`golang:1.25-bookworm`).
+- **CLI flags (1.0.0):** `--movies-port`, `--movies-log-level`, `--movies-data-dir` override env vars which override defaults. `--version`/`-v` prints bare semver to stdout, exits 0. `--help`/`-h` shows all flags with env-var names, exits 0. Unknown flags exit 2. `config.Load()` now accepts a `config.Flags` struct.
+- **govulncheck (1.0.0):** `make audit` installs govulncheck to GOPATH/bin and runs `./...`. Exit code 3 (vulnerabilities found) is treated as warning — make succeeds. Exit 1/2 (internal errors) fail the build. Two stdlib vulnerabilities in go1.26.3 vs go1.26.4 are expected on the local toolchain.
+- **Bench overlay (1.0.0):** `k8s/overlays/bench/kustomization.yaml` inherits base resource limits (500m CPU / 512Mi) without dev-overlay reduction. Use this for accurate §10.4 benchmarks.
 - **D1 — Response envelope:** All list endpoints return `{ "items": [...], "total": N, "page": N, "pageSize": N }`. Implemented as `Page[T any]` generic in `internal/store/types.go`.
 - **D2 — Roles scope:** `GET /api/movies` list items include cast-only roles (`actor`/`actress` categories) in a `cast` field. `GET /api/movies/{id}` includes all roles in a `roles` field.
 - **Store immutability:** `store.Store` has no exported mutable fields. `AllMovies()` and `AllActors()` return copies of the internal sorted slices.
@@ -78,7 +81,7 @@ CLI flags deferred to a later session. Env-var config only for now.
 - **Data files in image:** Dockerfile copies `src/data/` → `/data` in the final image via `COPY --from=builder /src/src/data /data`. Required because the `moviesx:dev` image predates this — it was a session-1 binary without store.Load.
 - **securityContext (0.4.0):** Container-level adds `allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, `capabilities.drop: [ALL]`. Pod-level adds `seccompProfile: RuntimeDefault`. No emptyDir needed — binary makes no filesystem writes.
 - **Replay tool (0.5.0):** Lives in `cmd/replay/`. Scenario format: YAML with `scenarios:` list. Template vars `{known_movie_id}` and `{known_actor_id}` discovered at startup via `/api/movies` and `/api/actors`. 8 assertion types. Benchmark: 50-worker goroutine pool, `time.NewTicker` rate control, p95 via sort+index. 54-scenario baseline suite (all §6 endpoints + all validation 400s + 404s), 2-scenario benchmark suite.
-- **Benchmark CPU limit:** Dev overlay caps moviesx at 200m CPU; at 500 RPS this causes throttle-induced p95 spikes. Verified by temporarily removing CPU limit (`kubectl patch`). A bench-specific overlay is a future improvement (parking lot).
+- **Benchmark CPU limit:** Dev overlay caps moviesx at 200m CPU; at 500 RPS this causes throttle-induced p95 spikes. Use `k8s/overlays/bench/` (inherits base 500m limit) for accurate benchmark runs. Verified in 1.0.0: p95=0.6ms at 500 RPS under bench overlay.
 - **Replay macOS reachability:** k3d pod IPs (10.42.x.x) are not directly reachable from macOS host. Run the replay binary inside the k3d container: `GOOS=linux go build -o bin/replay-linux ./cmd/replay && docker cp bin/replay-linux k3d-movies-server-0:/tmp/replay && docker exec k3d-movies-server-0 /tmp/replay --base-url http://<POD_IP>:8080 --scenarios /tmp/scenarios/baseline.yaml`
 
 ## Local Cluster
@@ -101,7 +104,7 @@ go test ./internal/validate/...    # validation unit tests
 go test ./internal/server/...      # server unit + integration tests (includes /metrics smoke tests)
 ```
 
-Coverage as of 0.5.0: **90.1%** total (gate: 80%; replay tool covered by `cmd/replay/assert_test.go`).
+Coverage as of 1.0.0: **95.3%** total (gate: 80%; replay tool covered by `cmd/replay/assert_test.go`).
 
 ## Replay Tool Usage
 
@@ -127,13 +130,15 @@ docker exec k3d-movies-server-0 /tmp/replay \
   --benchmark --duration 30s --concurrency 50 --rps 500
 ```
 
-## Build & Deploy Inner Loop (Session 5 — 0.5.0)
+## Build & Deploy Inner Loop (Session 6 — 1.0.0)
+
+See full step-by-step guide: [docs/dev-loop.md](docs/dev-loop.md)
 
 ```bash
 make test
 make swagger                              # regenerate docs/ if annotations changed
-docker build -t moviesx:0.5.0 .
-k3d image import moviesx:0.4.0 -c movies
+docker build -t moviesx:1.0.0 .
+k3d image import moviesx:1.0.0 -c movies
 
 # Apply via Kustomize dev overlay (pipes through host kubectl because k3d exec doesn't need kubeconfig)
 kubectl kustomize k8s/overlays/dev/ | docker exec -i k3d-movies-server-0 kubectl apply -f -
@@ -169,7 +174,7 @@ docker exec k3d-movies-server-0 wget -qO- "http://$GRAF_IP:3000/api/dashboards/u
 | `0.3.0` | Prometheus metrics + structured logging + Grafana + Kustomize | ✅ done |
 | `0.4.0` | OpenAPI/Swagger + /readyz + security hardening + NetworkPolicy | ✅ done |
 | `0.5.0` | Custom HTTP replay tool (§10.3 baseline + §10.4 benchmark) | ✅ done |
-| `1.0.0` | §14 gap close + inner-loop README + acceptance pass | — |
+| `1.0.0` | §14 gap close + inner-loop README + acceptance pass | ✅ done |
 
 ## Spec References
 

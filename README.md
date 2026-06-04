@@ -14,6 +14,7 @@ You are participating in an experiment to test whether a deliberate session-base
 | 2 | [METHODOLOGY.md](docs/METHODOLOGY.md) | Sessions + RPI + the fit check, with a worked example | 10 min |
 | 3 | [spec.md](docs/spec.md) | The Movies API spec — your build target | 10 min |
 | 4 | [session-log.md](session-log.md) | The log template you'll fill in as you go | skim |
+| 5 | [dev-loop.md](docs/dev-loop.md) | Inner-loop commands: fresh clone → live Grafana dashboard | 10 min |
 
 If you skip step 1 or 2, you'll do the experiment wrong and your data won't count. The whole point is the methodology.
 

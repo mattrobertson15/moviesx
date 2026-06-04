@@ -30,6 +30,13 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           env:
             - name: MOVIES_PORT
               value: "8080"
