@@ -194,7 +194,7 @@ Implemented API changes and testing. API wired and gets movies, actors, genres, 
 - [ x ] Next session starter: Implement /readyz deep readiness + OpenAPI/Swagger doc generation (0.4.0 scope).
 
 **End time:** 13:45
-**Total focus minutes:** 120
+**Total focus minutes:** 130
 **Tag shipped:** 0.3.0
 
 **One-paragraph summary**
@@ -243,7 +243,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - [ x ] Next session starter: ession 5 builds the custom HTTP replay tool — baseline functional suite + benchmark mode
 
 **End time:** 18:38
-**Total focus minutes:** 77
+**Total focus minutes:** 76
 **Tag shipped:** 0.4.0
 
 **One-paragraph summary**
@@ -264,7 +264,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - Out of scope: actorId/rating filters, NetworkPolicy (if deferred), inner-loop README, any API changes
 - Failure condition: uses an off-the-shelf load tool (k6, Vegeta, hey, etc.); baseline suite doesn't cover every §6 endpoint; benchmark mode doesn't report p95 latency and error rate
 
-**Start time:** *(w18:45)*
+**Start time:** *(18:45)*
 
 **RPI cycle**
 - Research: `.copilot-tracking/2026-06-03-replay-research.md`
@@ -342,7 +342,7 @@ Added Prometheus metrics middleware (`http_requests_total`, `http_request_durati
 - [x] §14 checklist confirmed green in one-paragraph summary
 
 **End time:** 08:35
-**Total focus minutes:** 358 (across session)
+**Total focus minutes:** 58
 **Tag shipped:** 1.0.0
 
 **One-paragraph summary**
